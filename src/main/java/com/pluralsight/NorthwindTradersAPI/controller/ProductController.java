@@ -4,6 +4,7 @@ import com.pluralsight.NorthwindTradersAPI.dao.ProductDaoJDBC;
 import com.pluralsight.NorthwindTradersAPI.model.Category;
 import com.pluralsight.NorthwindTradersAPI.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -49,6 +50,17 @@ public class ProductController {
     @RequestMapping(path="/productsByCategory",method=RequestMethod.GET)
     public List<Product> getProductsByCategory(@RequestParam(required = false) String category){
         return dao.getByCategory(category);
+    }
+
+    @RequestMapping(path="/productsAdd",method=RequestMethod.POST)
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public Product addProduct (
+            @RequestBody Product product
+    )
+    {
+
+// return the new supplier object
+        return dao.insert(product);
     }
 
 

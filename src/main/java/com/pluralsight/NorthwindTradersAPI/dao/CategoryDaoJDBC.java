@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +57,31 @@ public class CategoryDaoJDBC {
             System.out.println(e.getErrorCode());
         }
         return this.categories;
+    }
+    public Category insert(Category category){
+        String query = "INSERT INTO categories (CategoryID,CategoryName) VALUES (?, ?)";
+
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+                statement.setInt(1, category.getCategoryId());
+                statement.setString(2, category.getCategoryName());
+
+                int rowsAffected = statement.executeUpdate();
+
+                ResultSet rs = statement.getGeneratedKeys();
+
+                if (rs.next()) category.setCategoryId(rs.getInt(1));
+
+                if (rowsAffected > 0) {
+                    System.out.println("Product added successfully!");
+                }
+
+            }
+        } catch (SQLException e) {
+            System.out.println("Error adding product: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return category;
     }
 
 

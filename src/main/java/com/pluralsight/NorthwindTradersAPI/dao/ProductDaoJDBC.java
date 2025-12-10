@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.pluralsight.NorthwindTradersAPI.util.Utility.*;
 @Component
 public class ProductDaoJDBC implements ProductDao{
 
@@ -25,42 +24,30 @@ public class ProductDaoJDBC implements ProductDao{
     }
 
     @Override
-    public void add(Product product) {
-        String sql = "INSERT INTO `northwind`.`products` (`ProductID`,`ProductName`,`CategoryID`,`UnitPrice`,)VALUES " +
-                "(?,?,?,?);\n";
+    public Product insert(Product product) {
+        String sql = "INSERT INTO products (`ProductID`,`ProductName`,`UnitPrice`)VALUES " +
+                "(?,?,?);";
         try(Connection connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);){
+            PreparedStatement statement = connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)) {
             statement.setInt(1,product.getProductId());
             statement.setString(2,product.getName());
-            statement.setInt(3,getCatId(product.getCategory()));
             statement.setDouble(4,product.getPrice());
 
-            int added = statement.executeUpdate();
+            int rowsAffected = statement.executeUpdate();
 
-            if (added > 0) {
-                System.out.println("Product added successfully.");
-            } else {
-                System.out.println("Product not found.");
+            ResultSet rs = statement.getGeneratedKeys();
+
+            if (rs.next()) product.setProductId(rs.getInt(1));
+
+            if (rowsAffected > 0) {
+                System.out.println("Product added successfully!");
             }
         }
         catch (SQLException e){
             e.printStackTrace();
         }
-    }
-
-
-    @Override
-    public Product makeProduct(){
-        Product product = new Product(
-                getUserInt("ID: "),
-                getUserString("Product Name: "),
-                getUserString("Category: "),
-                getUserDouble("Price: "));
-        System.out.println("Preview:%n"+product);
         return product;
-
     }
-
 
     @Override
     public List<Product> getAll() {
